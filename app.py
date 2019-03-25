@@ -10,7 +10,8 @@ else:
 import librosa
 from keras.models import load_model
 import numpy as np
-from model.transform_data import change_song_to_frequency_data
+from scipy import stats
+from model.transform_data import transform_song
 # function for loading song
 def getSong():
   text2.delete(0.0, END)
@@ -40,15 +41,14 @@ def Predict():
     wav, sr = librosa.core.load('test.wav', sr=want_sr, mono=True, offset=0.0, duration=30)
     if wav.shape[0] < 30*sr:
       wav = np.append(wav, np.zeros(30*sr - wav.shape[0])) # pad with zeros to get 30 sec
-    wav = change_song_to_frequency_data(wav,sr)
-    print('skeet')
+    wav = transform_song(wav)
     # make our data match the nn expected input dimensions
-    wav = np.expand_dims(wav, axis=0)
-    wav = np.expand_dims(wav, axis=3)
+    #wav = np.expand_dims(wav, axis=0)
+    #wav = np.expand_dims(wav, axis=3)
     # load our saved model
     model=load_model('model/model.h5')
     # predict class
-    genre=model.predict_classes(wav)
+    genre=stats.mode(model.predict_classes(wav))[0]
     # print class to application
     textvar = "The song's genre is: %s!" %(label_name[int(genre)])
     text2.insert('insert', textvar+'\n')
