@@ -22,7 +22,7 @@ y_test = get_dummies(y_test)
 # get number of genres and their positions
 y_values = y_train.columns
 num_genres = len(y_values)
-np.savetxt('data/genres.txt', y_values, delimiter=" ", fmt="%s")
+np.savetxt('data/genres.txt', y_values, delimiter=' ', fmt='%s')
 # get the data from pandas
 y_train = y_train.values
 y_train_part = y_train_part.values

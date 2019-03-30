@@ -11,9 +11,13 @@ def splitsong(song, window = 0.1, overlap = 0.5):
 	return np.asarray(x)
 	
 def to_melspectrogram(song, n_fft = 1024, hop_length = 512):
-	melspec = lambda x: librosa.feature.melspectrogram(x, n_fft = n_fft, hop_length = hop_length)[:,:,np.newaxis]
-	melsong = map(melspec, song)
-	return np.asarray(list(melsong))
+	x = []
+	for i in range(song.shape[0]):
+		x.append(librosa.feature.melspectrogram(song[i], n_fft = n_fft, hop_length = hop_length))
+	x = np.asarray(x)
+	#x = x.reshape((x.shape[1],x.shape[2],x.shape[0]))
+	x = np.expand_dims(x, axis=3)
+	return x
 	
 def transform_song(song):
 	song = splitsong(song)
