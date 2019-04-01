@@ -30,6 +30,9 @@ y_validate = y_validate.values
 y_test = y_test.values
 # get model
 model = genre_model(num_genres, x_train[0].shape)
+# clear some memory
+songs = 0
+genres = 0
 try:
 	# train
 	model.fit(x_train_part, y_train_part, epochs=50, batch_size=32, validation_data=(x_validate,y_validate))
