@@ -14,9 +14,10 @@ import numpy as np
 import librosa
 
 sr_ = 22050
-data_file = 'data/data.npz'
+data_file = os.path.abspath(os.path.dirname(__file__))+'/data/data.npz'
+genre_folder = os.path.abspath(os.path.dirname(__file__))+'/../genres'
 
-if not os.path.isdir('../genre') and not os.path.isfile(data_file):
+if not os.path.isdir(genre_folder) and not os.path.isfile(data_file):
 	url = 'http://opihi.cs.uvic.ca/sound/genres.tar.gz' 
 	input_s = input('not finding data files, have you downloaded data from '+url+' (yes/no)? ')
 	if input_s == 'n' or input_s == 'no':
