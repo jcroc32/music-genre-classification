@@ -47,7 +47,11 @@ def Predict():
 		# load our saved model
 		model=load_model('model/model.h5')
 		# predict class
-		genre=stats.mode(model.predict_classes(wav))[0]
+		genre = model.predict(wav)
+		# pick highest probability for each 3s interval
+		genre = np.argmax(genre,axis =1)
+		# pick genre predicted the most
+		genre = stats.mode(genre)[0]
 		# print class to application
 		textvar = "The song's genre is: %s!" %(label_name[int(genre)])
 		text2.insert('insert', textvar+'\n')

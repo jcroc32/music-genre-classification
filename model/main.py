@@ -1,3 +1,4 @@
+import os
 from load import load_data
 from transform_data import transform_songs, split_songs
 from nn import genre_model
@@ -26,11 +27,11 @@ try:
 	loss, accuracy = model.evaluate(x_test, y_test)
 	print('test accuracy:', accuracy)
 	print('test loss:', loss)
-	model.save(file_path+'model.h5')
+	model.save(file_path+'/model.h5')
 except Exception as e:
 	print(e.args)
 	try:
-		model.save_weights(file_path+'temp_weights.h5')
+		model.save_weights(file_path+'/temp_weights.h5')
 		print('error occurred, saving weights to model/temp_weights.h5')
 	except:
 		print('model not defined, no weights saved')

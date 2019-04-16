@@ -6,7 +6,7 @@ from pandas import get_dummies
 
 genre_file = os.path.abspath(os.path.dirname(__file__))+'/data/genres.txt'
 
-def splitsong(song, window = 0.1, overlap = 0.0):
+def splitsong(song, window = 0.1, overlap = 0.5):
 	x = []
 	xshape = song.shape[0]
 	chunk = int(xshape*window)
@@ -48,7 +48,7 @@ def split_songs(songs, genres):
 	y_validate = get_dummies(y_validate)
 	y_test = get_dummies(y_test)
 	# get number of genres and their positions
-	y_values = y_train.columns
+	y_values = y_train_part.columns
 	num_genres = len(y_values)
 	np.savetxt(genre_file, y_values, delimiter=' ', fmt='%s')
 	# get the data from pandas
