@@ -13,9 +13,14 @@ else:
 import numpy as np
 import librosa
 
+## parameters:
+# default song sample rate
 sr_ = 22050
+# where the data extracted from audio files is stored
 data_file = os.path.abspath(os.path.dirname(__file__))+'/data/data.npz'
+# location of raw audio files
 genre_folder = os.path.abspath(os.path.dirname(__file__))+'/../genres'
+## 
 
 if not os.path.isdir(genre_folder) and not os.path.isfile(data_file):
 	url = 'http://opihi.cs.uvic.ca/sound/genres.tar.gz' 
@@ -33,10 +38,13 @@ def load_data(sr = sr_):
 	return songs, genres
   
 def read_from_raw_files(sr = sr_):
-	# window explorer to find main data folder
-	print('select folder from explorer')
-	Tk().withdraw()
-	data_folder = askdirectory()
+	if os.path.isdir(genre_folder):
+		data_folder = genre_folder
+	else:
+		# window explorer to find main data folder
+		print('select folder from explorer')
+		Tk().withdraw()
+		data_folder = askdirectory()
 	# error in finding folder
 	if not os.path.isdir(data_folder):
 		print('folder not found, program exiting')

@@ -15,4 +15,8 @@ Obviously the names of the files and folders will be different, but all songs sh
 the songs' genre name; all of the genre folders should be in one main folder. When training is done, direct the 
 file explorer to this main folder and the program will get all files from the main folder's subdirectories (the 
 genre folders). The songs do not need to be .wav files, any common audio file should do. The network only trains on 
-the first 30 seconds of the song and will pad songs with silence if they are shorter than 30 seconds.
+the first 30 seconds of the song and will pad songs with silence if they are shorter than 30 seconds.  
+Dataset download: http://opihi.cs.uvic.ca/sound/genres.tar.gz  or https://drive.google.com/open?id=1X33sLOPQohzrVaThHvZFuqF_PfCqY4Ai 
+(this is faster to download and linked to my gmail). Once downloaded, extract folder and put in music-genre-classification 
+folder.
+Demo video: https://youtu.be/OvO67VXRK7s  
