@@ -8,9 +8,10 @@ dataset
    . genre1file1.wav  
    . genre1file2.wav  
    ...  
- -genre2  
+ - genre2  
    . genre2file1.wav  
    ...  
+    
 Obviously the names of the files and folders will be different, but all songs should be grouped into a folder with
 the songs' genre name; all of the genre folders should be in one main folder. When training is done, direct the 
 file explorer to this main folder and the program will get all files from the main folder's subdirectories (the 
