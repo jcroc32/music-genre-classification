@@ -18,5 +18,5 @@ genre folders). The songs do not need to be .wav files, any common audio file sh
 the first 30 seconds of the song and will pad songs with silence if they are shorter than 30 seconds.  
 Dataset download: http://opihi.cs.uvic.ca/sound/genres.tar.gz  or https://drive.google.com/open?id=1X33sLOPQohzrVaThHvZFuqF_PfCqY4Ai 
 (this is faster to download and linked to my gmail). Once downloaded, extract folder and put in music-genre-classification 
-folder.
+folder.  
 Demo video: https://youtu.be/OvO67VXRK7s  
