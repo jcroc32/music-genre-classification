@@ -13,6 +13,7 @@ import numpy as np
 import sounddevice as sd
 from scipy import stats
 from model.transform_data import transform_song
+from model.nn import predict_song
 # function for loading song
 def getSong():
 	text2.delete(0.0, END)
@@ -43,17 +44,12 @@ def Predict():
 		wav, sr = librosa.core.load('test.wav', sr=want_sr, mono=True, offset=0.0, duration=30)
 		if wav.shape[0] < 30*sr:
 			wav = np.append(wav, np.zeros(30*sr - wav.shape[0])) # pad with zeros to get 30 sec
-		wav = transform_song(wav)
 		# load our saved model
 		model=load_model('model/model.h5')
 		# predict class
-		genre = model.predict(wav)
-		# pick highest probability for each 3s interval
-		genre = np.argmax(genre,axis =1)
-		# pick genre predicted the most
-		genre = stats.mode(genre)[0]
+		genre = predict_song(wav,label_names,transform_song,sr,3,model)
 		# print class to application
-		textvar = "The song's genre is: %s!" %(label_name[int(genre)])
+		textvar = "The song's genre is: %s!" %(genre)
 		text2.insert('insert', textvar+'\n')
 		text2.update()
 	except Exception as e:
@@ -66,7 +62,7 @@ def Predict():
     
 want_sr = 22050 #what we resample song to
 # class labels
-label_name = np.loadtxt('model/data/genres.txt', dtype=str, delimiter=" ")
+label_names = np.loadtxt('model/data/genres.txt', dtype=str, delimiter=" ")
 # start tkinter app
 top = Tk()
 top.title = 'Genre Classifier'

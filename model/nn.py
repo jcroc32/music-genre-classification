@@ -30,36 +30,23 @@ def genre_model(num_genres, input_shape):
 	output = Dense(num_genres, activation='softmax')(model)
 	model = Model(input,output)
 	return(model)
-
+# get index integer value that nn predicts
 def predict_song_index(song,model):
 	pred = model.predict(song)
 	pred = np.argmax(pred,axis =1)
 	return stats.mode(pred)[0]
-	
+# predict genre for a single song	(genre_list is possible genres to pick from)
+def predict_song(song,genres_list,transform_song,sr,time_length,model):
+	song = transform_song(song,sr,time_length)
+	index = predict_song_index(song,model)
+	return genres_list[index][0]
+# determine the accuracy of model given test data songs, genres
 def test_model(songs,genres,genres_list,transform_song,sr,time_length,model):
 	correct = 0
 	i = 0
 	for song in songs:
-		song = transform_song(song,sr,time_length)
-		index = predict_song_index(song,model)
-		if genres_list[index[0]] == genres[i]:
+		genre = predict_song(song,genres_list,transform_song,sr,time_length,model)
+		if genre == genres[i]:
 			correct = correct+1
 		i = i+1
 	print('test accuracy: ', correct/genres.shape[0])
-
-# old model using Fourier transform and transfer learning
-from keras.models import Sequential
-from keras.applications.vgg16 import VGG16
-
-def old_genre_model(num_genres, input_shape, freezed_layers = 5):
-	input_tensor = Input(shape=input_shape)
-	vgg16 = VGG16(include_top=False, weights='imagenet',input_tensor=input_tensor)
-	top = Sequential()
-	top.add(Flatten(input_shape=vgg16.output_shape[1:]))
-	top.add(Dense(256, activation='relu'))
-	top.add(Dropout(0.5))
-	top.add(Dense(num_genres, activation='softmax'))
-	model = Model(inputs=vgg16.input, outputs=top(vgg16.output))
-	for layer in model.layers[:freezed_layers]:
-		layer.trainable = False
-	return model

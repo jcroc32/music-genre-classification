@@ -23,9 +23,9 @@ time_length = 3
 
 ## for hyperparameter tunig
 # use validation set
-validate = True
+validate = False
 # number of epochs
-epochs = 80
+epochs = 22
 # batch size
 batch_size = 32
 ## 
@@ -77,6 +77,7 @@ try:
 	# plot the accuracy and loss of training and validation data
 	for key in historyDict.keys():
 		plt.plot(historyDict[key],'.-')
+	plt.legend(historyDict.keys())
 	# save model to file
 	model.save(model_file)
 	# show plots
@@ -91,7 +92,7 @@ except Exception as e:
 		print('model not defined, no weights saved')
 # test model on 3s interval
 loss, accuracy = model.evaluate(x_test_transform, y_test_transform)
-print('test accuracy:', accuracy)
-print('test loss:', loss)
+print('test 3s intervals accuracy:', accuracy)
+print('test 3s intervals loss:', loss)
 # test model on whole songs
 test_model(x_test,y_test,genres,transform_song,sr,time_length,model)
