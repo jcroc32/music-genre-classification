@@ -21,3 +21,5 @@ Dataset download: http://opihi.cs.uvic.ca/sound/genres.tar.gz  or https://drive.
 (this is faster to download and linked to my gmail). Once downloaded, extract folder and put in music-genre-classification 
 folder.  
 Demo video: https://youtu.be/OvO67VXRK7s  
+Note: system to train and test nn used 16GB of system ram and 8GB vram. Using a system with lesser spec may have performance
+drop or may not run at all.
