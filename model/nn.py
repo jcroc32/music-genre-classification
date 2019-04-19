@@ -1,3 +1,5 @@
+from __future__ import print_function
+import sys
 import numpy as np
 from scipy import stats
 from keras import Input
@@ -42,6 +44,7 @@ def predict_song(song,genres_list,transform_song,sr,time_length,model):
 	return genres_list[index][0]
 # determine the accuracy of model given test data songs, genres
 def test_model(songs,genres,genres_list,transform_song,sr,time_length,model):
+	print('testing model ', end='')
 	correct = 0
 	i = 0
 	for song in songs:
@@ -49,4 +52,6 @@ def test_model(songs,genres,genres_list,transform_song,sr,time_length,model):
 		if genre == genres[i]:
 			correct = correct+1
 		i = i+1
-	print('test accuracy: ', correct/genres.shape[0])
+		print('.', end='')
+		sys.stdout.flush()
+	print('\ntest song accuracy: ', correct/genres.shape[0])
