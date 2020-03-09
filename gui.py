@@ -1,93 +1,76 @@
 import sys
 import os
-# figure out if using python 2 or 3
+import librosa
+import sounddevice
+import numpy as np
+from keras.models import load_model
+from model.transform_data import transform_song, pad_song
+from model.nn import predict_song
+# make compatabile for python 2 and 3
 if sys.version_info[0] < 3:
 	from Tkinter import *
 	from tkFileDialog import askopenfilename
 else:
 	from tkinter import *
 	from tkinter.filedialog import askopenfilename
-import librosa
-from keras.models import load_model
-import numpy as np
-import sounddevice as sd
-from scipy import stats
-from model.transform_data import transform_song
-from model.nn import predict_song
+#what we resample song to
+resample_sr = 22050
+# time length of song segments
+time_length = 3
+global song
+genres = np.loadtxt('model/data/genres.txt', dtype=str, delimiter=" ")
+model = load_model('model/model.h5')
 # function for loading song
-def getSong():
-	text2.delete(0.0, END)
-	text1.delete(0.0, END)
+def get_song():
+	genre_output.delete(0.0, END)
+	app_status.delete(0.0, END)
 	file_name = askopenfilename(title='Open song file') 
 	try:
-		text1.insert('insert', 'getting song...\n')
-		text1.update()
-		wav, sr = librosa.core.load(file_name, sr=want_sr, mono=True, offset=0.0, duration=30)
-		# create data file our nn can interpret
-		librosa.output.write_wav('test.wav', wav, sr, norm=True)
-		# print that file read sucessfully to application
-		text1.insert('insert', 'sucessfully got '+os.path.basename(file_name)+'!\n')
-		text1.update()
-		sd.play(wav,sr)
+		app_status.insert('insert', 'getting song...\n')
+		app_status.update()
+		global song
+		song, sr = librosa.load(file_name, sr=resample_sr, mono=True, offset=0.0, duration=None)
+		app_status.insert('insert', 'sucessfully got '+os.path.basename(file_name)+'!\n')
+		app_status.update()
+		sounddevice.play(song, resample_sr)
 	except Exception as e:
 		print(e.args)
-		# file not read right
-		text1.insert('insert', 'format not recognized or file not found\n'
+		app_status.insert('insert', 'format not recognized or file not found\n'
 		'try opening another file\n(must be an audio file)\n')
-		text1.update()
+		app_status.update()
 # function for finding song's genre
-def Predict():
-	text2.delete(0.0, END)
-	text2.insert('insert', 'predicting genre...\n')
-	text2.update()
+def predict_genre():
+	genre_output.delete(0.0, END)
+	genre_output.insert('insert', 'predicting genre...\n')
+	genre_output.update()
 	try:
-		wav, sr = librosa.core.load('test.wav', sr=want_sr, mono=True, offset=0.0, duration=30)
-		if wav.shape[0] < 30*sr:
-			wav = np.append(wav, np.zeros(30*sr - wav.shape[0])) # pad with zeros to get 30 sec
-		# load our saved model
-		model=load_model('model/model.h5')
-		# predict class
-		genre = predict_song(wav,label_names,transform_song,sr,3,model)
-		# print class to application
+		padded_song = pad_song(song, resample_sr, time_length)
+		genre = predict_song(padded_song, genres, transform_song, resample_sr, time_length, model)
 		textvar = "The song's genre is: %s!" %(genre)
-		text2.insert('insert', textvar+'\n')
-		text2.update()
+		genre_output.insert('insert', textvar+'\n')
+		genre_output.update()
 	except Exception as e:
 		print(e.args)
 		# couldn't find test.wav or model.h5 most likely
-		text2.insert('insert', 'no loaded song found\n'
-		'try opening another file\n'
-		'(should see test.wav in folder\n after loading song)\n')
-		text2.update()
-    
-want_sr = 22050 #what we resample song to
-# class labels
-label_names = np.loadtxt('model/data/genres.txt', dtype=str, delimiter=" ")
-# start tkinter app
+		genre_output.insert('insert', 'no loaded song found\n'
+		'try opening another file\n')
+		genre_output.update()
 top = Tk()
-top.title = 'Genre Classifier'
-# make app size 600 by 250
+top.title('Genre Classifier')
 top.geometry('600x250')
-# create canvas we can put our buttons and output text on
-canvas = Canvas(top, width=160,height=160, bd=0,bg='white')
+canvas = Canvas(top, width=160, height=160, bd=0, bg='white')
 canvas.grid(row=1, column=0)
-# button for opening song file
-submit_button = Button(top, text ='Open/Play', command = getSong)
-submit_button.grid(row=2, column=0)
-# button for predicting song genre
-submit_button = Button(top, text ='Predict', command = Predict)
-submit_button.grid(row=2, column=1)
-# button for stop playing song
-submit_button = Button(top, text ='Stop Music', command = sd.stop)
-submit_button.grid(row=3, column=0)
-# simple instruction for running app
-label1=Label(top,text='Please <Open/Play> a song file, then press <Predict> ')
-label1.grid(row=0)
-# reading file output
-text1=Text(top,bd=0, width=32,height=10,font='Fixdsys -14')
-text1.grid(row=1, column=0)
-# predicting genre output
-text2=Text(top,bd=0, width=32,height=10,font='Fixdsys -14')
-text2.grid(row=1, column=1)
+get_song_button = Button(top, text='Open/Play', command=get_song)
+get_song_button.grid(row=2, column=0)
+predict_genre_button = Button(top, text ='Predict Genre', command=predict_genre)
+predict_genre_button.grid(row=2, column=1)
+stop_song_button = Button(top, text='Stop Music', command=sounddevice.stop)
+stop_song_button.grid(row=3, column=0)
+instructions = Label(top, text='Please <Open/Play> a song file, then press <Predict Genre> ')
+instructions.grid(row=0)
+app_status = Text(top, bd=0, width=32, height=10, font='Fixdsys -14')
+app_status.grid(row=1, column=0)
+genre_output = Text(top, bd=0, width=32, height=10, font='Fixdsys -14')
+genre_output.grid(row=1, column=1)
 # keep application going till user closes it
 top.mainloop()

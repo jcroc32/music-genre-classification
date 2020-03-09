@@ -11,7 +11,5 @@ songs, genres = load_data(sr)
 x_train, x_test, y_train, y_test = train_test_split(songs, genres, stratify=genres, test_size=0.2, random_state=1)
 genres = np.loadtxt('model/data/genres.txt', dtype=str, delimiter=" ")
 
-model=load_model('model/model.h5')
-model.summary()
-
+model = load_model('model/model.h5')
 test_model(x_test,y_test,genres,transform_song,sr,time_length,model)

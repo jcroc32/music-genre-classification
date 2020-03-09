@@ -1,7 +1,10 @@
 from __future__ import print_function
 import os
 import sys
-# figure out if using python 2 or 3
+import librosa
+import numpy as np
+from transform_data import pad_song
+# make compatabile for python 2 and 3
 if sys.version_info[0] < 3:
 	from Tkinter import Tk
 	from tkFileDialog import askdirectory
@@ -10,89 +13,76 @@ if sys.version_info[0] < 3:
 else:
 	from tkinter import Tk
 	from tkinter.filedialog import askdirectory
-import numpy as np
-import librosa
-
-## parameters:
-# default song sample rate
-sr_ = 22050
-# where the data extracted from audio files is stored
+# where the dataset extracted from audio files is stored
 data_file = os.path.abspath(os.path.dirname(__file__))+'/data/data.npz'
-# location of raw audio files
+# possible location of raw audio files
 genre_folder = os.path.abspath(os.path.dirname(__file__))+'/../genres'
-## 
-
+# check if either of the 2 file/folder above exist
 if not os.path.isdir(genre_folder) and not os.path.isfile(data_file):
 	url = 'http://opihi.cs.uvic.ca/sound/genres.tar.gz' 
-	input_s = input('not finding data files, have you downloaded data from '+url+' (yes/no)? ')
+	input_s = input('\n Not finding data files, have you downloaded data from '+url+'? (yes/no) ')
 	if input_s == 'n' or input_s == 'no':
-		print('please download tar file from '+url+' and run program again once file is unpacked')
+		print('\n Please download tar file from '+url+' and run program again once file is unpacked')
 		quit()
-
-def load_data(sr = sr_):
-	# no numpy file named data, have to read in all files to create data tensor
+# general function to load dataset
+def load_data(sr, time_length):
 	if not os.path.isfile(data_file):
-		songs, genres = read_from_raw_files(sr)
-	else: # data tensor found in /data/data.npz
+		songs, genres = read_from_raw_files(sr, time_length)
+	input_s = input('\n Reload the data from source? (i.e. read from audio files, not cached .npz file: yes/no) ')
+	if input_s != 'n' and input_s != 'no':
+		songs, genres = read_from_raw_files(sr, time_length)
+	else:
 		songs, genres = read_from_data_file(sr)
 	return songs, genres
-  
-def read_from_raw_files(sr = sr_):
+# function called if we need to extract dataset from raw audio files
+def read_from_raw_files(sr, time_length):
 	if os.path.isdir(genre_folder):
 		data_folder = genre_folder
 	else:
-		# window explorer to find main data folder
-		print('select folder from explorer')
+		print('\n Select folder from explorer')
 		Tk().withdraw()
 		data_folder = askdirectory()
-	# error in finding folder
 	if not os.path.isdir(data_folder):
-		print('folder not found, program exiting')
+		print('\n Folder not found, program exiting')
 		quit()
 	else:
 		genre_folders = os.listdir(data_folder)
-	# initialize data arrays  
 	songs = []
 	genres = []
-	# go through each folder and read in data from all files
 	for sub_folder in genre_folders:
 		genre_path = data_folder + '/' + sub_folder
 		audio_files = os.listdir(genre_path)
-		print('Reading in '+sub_folder+' songs: ', end='')
+		print(' Reading in '+sub_folder+' songs: ', end='')
 		sys.stdout.flush()
-		# get each file
 		for audio_name in audio_files:
-			wav, sr = librosa.core.load(genre_path + '/' + audio_name, sr=sr, mono=True, offset=0.0, duration=30)
-			if wav.shape[0] < 30*sr:
-				wav = np.append(wav, np.zeros(30*sr - wav.shape[0])) # pad with zeros to get 30s
+			song, sr = librosa.load(genre_path + '/' + audio_name, sr=sr, mono=True, offset=0.0, duration=None)
+			song = pad_song(song, sr, time_length)
 			print('.', end='')
 			sys.stdout.flush()
-			# add data to array
-			songs.append(wav)
+			songs.append(song)
 			genres.append(sub_folder)
-		print('\nfinished')
+		print('\n Finished reading '+sub_folder+' songs')
 		sys.stdout.flush()
-	songs = np.asarray(songs)
-	genres = np.asarray(genres, dtype=str)
-	print('saving data to /data/data.npz (this may take a while)')
-	# save data arrays to file (/data/data.npz)
+	songs = np.array(songs)
+	genres = np.array(genres, dtype=str)
+	print('\n Saving data to ./data/data.npz (this may take a while)')
 	np.savez(data_file, songs=songs, genres=genres, sr=sr)
-	print('save finished')
+	print(' Save finished')
 	return songs, genres
-  
-def read_from_data_file(sr = sr_):
-	print('reading in data from /data/data.npz (this may take a while)')
+# function called if we have dataset saved to a .npz file
+def read_from_data_file(sr):
+	print(' Reading in data from /data/data.npz (this may take a while)')
 	data = np.load(data_file)
 	songs = data['songs']
 	genres = data['genres']
 	if sr != data['sr']:
-		input_string = input('sr found in /data.npz does not match the sr given ('
-			+str(sr)+' != '+str(data['sr'])+') \nDo you want to re-read files? '
-			+'(this may take a while and should only be done if absolutely necessary) ')
+		input_string = input('\n Sr found in /data.npz does not match the sr given ('
+			+str(sr)+' != '+str(data['sr'])+') \n Do you want to re-read raw files? '
+			+'(this may take a while and is only necessary if the model is dramatically changed) ')
 		if input_string == 'y' or input_string == 'yes':
 			str_sr = str(data['sr'])
 			data.close()
 			os.rename(data_file,data_file[:-4]+str_sr+'.npz')
 			return read_from_raw_files(sr)   
-	print('finished reading data')
+	print(' Finished reading data')
 	return songs, genres

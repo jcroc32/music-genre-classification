@@ -27,11 +27,11 @@ validate = False
 # number of epochs
 epochs = 22
 # batch size
-batch_size = 32
+batch_size = 16
 ## 
 
 # load data
-songs, genres = load_data(sr)
+songs, genres = load_data(sr, time_length)
 # break data into training and testing data
 x_train, x_test, y_train, y_test = train_test_split(songs, genres, stratify=genres, test_size=0.2, random_state=1)
 # break into training and validation data
@@ -87,12 +87,12 @@ except Exception as e:
 	print(e.args)
 	try:
 		model.save_weights(weights_file)
-		print('error occurred, saving weights to '+weights_file)
+		print(' Error occurred, saving weights to '+weights_file)
 	except:
-		print('model not defined, no weights saved')
+		print(' Model not defined, no weights saved')
 # test model on 3s interval
 loss, accuracy = model.evaluate(x_test_transform, y_test_transform)
-print('test 3s intervals accuracy:', accuracy)
-print('test 3s intervals loss:', loss)
+print(' Test accuracy for the 3 second intervals: ', accuracy)
+print(' Test loss for the 3 second intervals: ', loss)
 # test model on whole songs
 test_model(x_test,y_test,genres,transform_song,sr,time_length,model)
