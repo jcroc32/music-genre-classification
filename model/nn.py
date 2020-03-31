@@ -11,7 +11,7 @@ from keras.layers.convolutional import Conv1D, MaxPooling1D, AveragePooling1D
 # my wavenet model
 def genre_model(num_genres, input_shape):
 	input = Input(shape=input_shape)
-	model = Conv1D(filters=128, kernel_size=9, activation='relu', dilation_rate=1)(model)
+	model = Conv1D(filters=128, kernel_size=9, activation='relu', dilation_rate=1)(input)
 	model = MaxPooling1D(pool_size=3)(model)
 	model = Dropout(0.25)(model)
 	model = Conv1D(filters=128, kernel_size=9, activation='relu', dilation_rate=2)(model)
